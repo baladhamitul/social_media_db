@@ -1,0 +1,22 @@
+use("social_media_demo");
+
+const followerIdRaw = "6940a0be4952173915b4014e";
+const followeeIdRaw = "6940a0be4952173915b4014d";
+
+const followerId = followerIdRaw.startsWith("REPLACE")
+  ? db.users.findOne({}, { _id: 1 })._id
+  : ObjectId(followerIdRaw);
+const followeeId = followeeIdRaw.startsWith("REPLACE")
+  ? db.users.findOne({}, { _id: 1 })._id
+  : ObjectId(followeeIdRaw);
+
+db.follows.insertOne({
+  followerId,
+  followeeId,
+  createdAt: new Date(),
+});
+
+// db.follows.deleteOne({
+//   followerId,
+//   followeeId,
+// });

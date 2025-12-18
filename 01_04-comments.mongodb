@@ -1,0 +1,19 @@
+use("social_media_demo");
+
+const postIdRaw = "REPLACE_POST_ID";
+const authorIdRaw = "REPLACE_AUTHOR_ID";
+
+const postId = postIdRaw.startsWith("REPLACE")
+  ? db.posts.findOne({}, { _id: 1 })._id
+  : ObjectId(postIdRaw);
+const authorId = authorIdRaw.startsWith("REPLACE")
+  ? db.users.findOne({}, { _id: 1 })._id
+  : ObjectId(authorIdRaw);
+
+db.comments.insertOne({
+  postId,
+  authorId,
+  text: "Nice post!",
+  parentCommentId: null,
+  createdAt: new Date(),
+});

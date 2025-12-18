@@ -1,0 +1,38 @@
+use("social_media_demo");
+
+const userIdRaw = "REPLACE_USER_ID";
+const userId = userIdRaw.startsWith("REPLACE")
+  ? db.users.findOne({}, { _id: 1 })._id
+  : ObjectId(userIdRaw);
+const pageSize = 10;
+const page = 0;
+
+const followeeIds = db.follows.find({ followerId: userId }).map((f) => f.followeeId);
+
+db.posts.aggregate([
+  { $match: { authorId: { $in: followeeIds }, visibility: "public" } },
+  { $sort: { createdAt: -1 } },
+  { $skip: page * pageSize },
+  { $limit: pageSize },
+  {
+    $lookup: {
+      from: "users",
+      localField: "authorId",
+      foreignField: "_id",
+      as: "author",
+    },
+  },
+  { $unwind: "$author" },
+  {
+    $project: {
+      text: 1,
+      hashtags: 1,
+      createdAt: 1,
+      visibility: 1,
+      stats: 1,
+      "author._id": 1,
+      "author.profile.name": 1,
+      "author.profile.avatarUrl": 1,
+    },
+  },
+]);

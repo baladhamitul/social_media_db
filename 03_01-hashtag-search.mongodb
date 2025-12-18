@@ -1,0 +1,9 @@
+use("social_media_demo");
+
+const hashtag = "#coding"; // change as needed
+
+db.posts
+  .find({ hashtags: hashtag, visibility: "public" })
+  .sort({ createdAt: -1 })
+  .limit(20)
+  .project({ text: 1, hashtags: 1, createdAt: 1, authorId: 1, stats: 1 });

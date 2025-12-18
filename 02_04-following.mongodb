@@ -1,0 +1,22 @@
+use("social_media_demo");
+
+const userIdRaw = "REPLACE_USER_ID";
+const userId = userIdRaw.startsWith("REPLACE")
+  ? db.users.findOne({}, { _id: 1 })._id
+  : ObjectId(userIdRaw);
+
+db.follows
+  .aggregate([
+    { $match: { followerId: userId } },
+    { $lookup: { from: "users", localField: "followeeId", foreignField: "_id", as: "followee" } },
+    { $unwind: "$followee" },
+    {
+      $project: {
+        _id: 0,
+        followeeId: "$followee._id",
+        name: "$followee.profile.name",
+        bio: "$followee.profile.bio",
+      },
+    },
+    { $limit: 50 },
+  ]);

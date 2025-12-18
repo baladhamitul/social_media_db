@@ -1,0 +1,26 @@
+use("social_media_demo");
+
+const userIdRaw = "REPLACE_USER_ID";
+const emailRaw = "kellen_effertz45@gmail.com"; // change if needed
+
+db.users.insertOne({
+  email: emailRaw,
+  passwordHash: "hashed_password_here",
+  profile: { name: "New User", bio: "Hello Mongo!", avatarUrl: "" },
+  settings: { isPrivate: false },
+  createdAt: new Date(),
+});
+
+const targetId = userIdRaw.startsWith("REPLACE")
+  ? db.users.findOne({ email: emailRaw }, { _id: 1 })._id
+  : ObjectId(userIdRaw);
+
+db.users.updateOne(
+  { _id: targetId },
+  {
+    $set: {
+      "profile.bio": "i love mongodb !!!",
+      "settings.isPrivate": true,
+    },
+  }
+);

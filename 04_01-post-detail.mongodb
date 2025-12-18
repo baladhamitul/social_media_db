@@ -1,0 +1,81 @@
+use("social_media_demo");
+
+const postIdRaw = "REPLACE_POST_ID";
+const postId = postIdRaw.startsWith("REPLACE")
+  ? db.posts.findOne({}, { _id: 1 })._id
+  : ObjectId(postIdRaw);
+
+db.posts.aggregate([
+  { $match: { _id: postId } },
+  {
+    $lookup: {
+      from: "users",
+      localField: "authorId",
+      foreignField: "_id",
+      as: "author",
+    },
+  },
+  { $unwind: "$author" },
+  {
+    $lookup: {
+      from: "reactions",
+      let: { pid: "$_id" },
+      pipeline: [
+        { $match: { $expr: { $eq: ["$postId", "$$pid"] } } },
+        { $group: { _id: "$type", count: { $sum: 1 } } },
+        { $project: { _id: 0, type: "$_id", count: 1 } },
+      ],
+      as: "reactionSummary",
+    },
+  },
+  {
+    $lookup: {
+      from: "comments",
+      let: { pid: "$_id" },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [{ $eq: ["$postId", "$$pid"] }, { $eq: ["$parentCommentId", null] }],
+            },
+          },
+        },
+        { $sort: { createdAt: 1 } },
+        { $limit: 20 },
+        {
+          $lookup: {
+            from: "users",
+            localField: "authorId",
+            foreignField: "_id",
+            as: "author",
+          },
+        },
+        { $unwind: "$author" },
+        {
+          $project: {
+            text: 1,
+            createdAt: 1,
+            "author._id": 1,
+            "author.profile.name": 1,
+            "author.profile.avatarUrl": 1,
+          },
+        },
+      ],
+      as: "comments",
+    },
+  },
+  {
+    $project: {
+      text: 1,
+      hashtags: 1,
+      visibility: 1,
+      createdAt: 1,
+      stats: 1,
+      "author._id": 1,
+      "author.profile.name": 1,
+      "author.profile.avatarUrl": 1,
+      reactionSummary: 1,
+      comments: 1,
+    },
+  },
+]);

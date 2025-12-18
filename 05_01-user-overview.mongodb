@@ -1,0 +1,122 @@
+use("social_media_demo");
+
+const userIdRaw = "6940a0be4952173915b4014e"; // or leave and set emailRaw
+const emailRaw = "new.user4@example.com"; // set to resolve by email
+
+let userId = null;
+if (!emailRaw.startsWith("REPLACE")) {
+  const found = db.users.findOne({ email: emailRaw }, { _id: 1 });
+  if (found) userId = found._id;
+}
+
+if (!userId) {
+  userId =
+    userIdRaw.startsWith("REPLACE") && emailRaw.startsWith("REPLACE")
+      ? db.users.findOne({}, { _id: 1 })._id
+      : ObjectId(userIdRaw);
+}
+
+db.users.aggregate([
+  { $match: { _id: userId } },
+  {
+    $lookup: {
+      from: "posts",
+      let: { uid: "$_id" },
+      pipeline: [
+        { $match: { $expr: { $eq: ["$authorId", "$$uid"] } } },
+        { $sort: { createdAt: -1 } },
+        { $limit: 20 },
+      ],
+      as: "posts",
+    },
+  },
+  {
+    $lookup: {
+      from: "follows",
+      let: { uid: "$_id" },
+      pipeline: [
+        { $match: { $expr: { $eq: ["$followeeId", "$$uid"] } } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "followerId",
+            foreignField: "_id",
+            as: "follower",
+          },
+        },
+        { $unwind: "$follower" },
+        {
+          $project: {
+            _id: 0,
+            followerId: "$follower._id",
+            name: "$follower.profile.name",
+            bio: "$follower.profile.bio",
+          },
+        },
+        { $limit: 50 },
+      ],
+      as: "followers",
+    },
+  },
+  {
+    $lookup: {
+      from: "follows",
+      let: { uid: "$_id" },
+      pipeline: [
+        { $match: { $expr: { $eq: ["$followerId", "$$uid"] } } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "followeeId",
+            foreignField: "_id",
+            as: "followee",
+          },
+        },
+        { $unwind: "$followee" },
+        {
+          $project: {
+            _id: 0,
+            followeeId: "$followee._id",
+            name: "$followee.profile.name",
+            bio: "$followee.profile.bio",
+          },
+        },
+        { $limit: 50 },
+      ],
+      as: "following",
+    },
+  },
+  {
+    $lookup: {
+      from: "comments",
+      let: { uid: "$_id" },
+      pipeline: [
+        { $match: { $expr: { $eq: ["$authorId", "$$uid"] } } },
+        { $sort: { createdAt: -1 } },
+        { $limit: 20 },
+        { $project: { text: 1, postId: 1, createdAt: 1, parentCommentId: 1 } },
+      ],
+      as: "comments",
+    },
+  },
+  {
+    $lookup: {
+      from: "reactions",
+      let: { uid: "$_id" },
+      pipeline: [
+        { $match: { $expr: { $eq: ["$userId", "$$uid"] } } },
+        { $sort: { createdAt: -1 } },
+        { $limit: 20 },
+        { $project: { postId: 1, type: 1, createdAt: 1 } },
+      ],
+      as: "reactions",
+    },
+  },
+  {
+    $addFields: {
+      followerCount: { $size: "$followers" },
+      followingCount: { $size: "$following" },
+      postCount: { $size: "$posts" },
+    },
+  },
+]).forEach((doc) => printjson(doc));

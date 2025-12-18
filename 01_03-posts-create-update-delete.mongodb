@@ -1,0 +1,25 @@
+use("social_media_demo");
+
+const authorIdRaw = "REPLACE_AUTHOR_ID";
+const postIdRaw = "REPLACE_POST_ID";
+
+const authorId = authorIdRaw.startsWith("REPLACE")
+  ? db.users.findOne({}, { _id: 1 })._id
+  : ObjectId(authorIdRaw);
+const postId = postIdRaw.startsWith("REPLACE")
+  ? db.posts.findOne({}, { _id: 1 })._id
+  : ObjectId(postIdRaw);
+
+db.posts.insertOne({
+  authorId,
+  text: "Trying out MongoDB playground!",
+  media: [],
+  hashtags: ["#mongodb", "#hello"],
+  visibility: "public",
+  createdAt: new Date(),
+  stats: { commentCount: 0, reactionCount: 0 },
+});
+
+db.posts.updateOne({ _id: postId, authorId }, { $set: { text: "Updated post text" } });
+
+db.posts.deleteOne({ _id: postId, authorId });

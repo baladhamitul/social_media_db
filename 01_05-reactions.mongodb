@@ -1,0 +1,23 @@
+use("social_media_demo");
+
+const postIdRaw = "REPLACE_POST_ID";
+const userIdRaw = "REPLACE_USER_ID";
+
+const postId = postIdRaw.startsWith("REPLACE")
+  ? db.posts.findOne({}, { _id: 1 })._id
+  : ObjectId(postIdRaw);
+const userId = userIdRaw.startsWith("REPLACE")
+  ? db.users.findOne({}, { _id: 1 })._id
+  : ObjectId(userIdRaw);
+
+db.reactions.insertOne({
+  postId,
+  userId,
+  type: "like",
+  createdAt: new Date(),
+});
+
+db.reactions.deleteOne({
+  postId,
+  userId,
+});

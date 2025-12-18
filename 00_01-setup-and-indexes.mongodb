@@ -1,0 +1,19 @@
+use("social_media_demo");
+
+db.users.createIndex({ email: 1 }, { unique: true });
+db.users.createIndex({ "profile.name": 1 });
+
+db.follows.createIndex({ followerId: 1, followeeId: 1 }, { unique: true });
+db.follows.createIndex({ followeeId: 1 });
+
+db.posts.createIndex({ authorId: 1, createdAt: -1 });
+db.posts.createIndex({ hashtags: 1 });
+db.posts.createIndex({ visibility: 1, createdAt: -1 });
+
+db.comments.createIndex({ postId: 1, createdAt: 1 });
+db.comments.createIndex({ parentCommentId: 1 });
+
+db.reactions.createIndex({ postId: 1, userId: 1 }, { unique: true });
+db.reactions.createIndex({ postId: 1, type: 1 });
+
+db.notifications.createIndex({ userId: 1, read: 1, createdAt: -1 });
