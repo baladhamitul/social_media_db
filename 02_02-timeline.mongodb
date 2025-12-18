@@ -1,12 +1,21 @@
 use("social_media_demo");
 
-const userIdRaw = "REPLACE_USER_ID";
+const userIdRaw = "6940a0be4952173915b40157";
 const userId = userIdRaw.startsWith("REPLACE")
   ? db.users.findOne({}, { _id: 1 })._id
   : ObjectId(userIdRaw);
 
-db.posts
-  .find({ authorId: userId })
-  .sort({ createdAt: -1 })
-  .limit(20)
-  .project({ text: 1, hashtags: 1, visibility: 1, createdAt: 1, stats: 1 });
+db.posts.aggregate([
+  { $match: { authorId: userId } },
+  { $sort: { createdAt: -1 } },
+  { $limit: 20 },
+  {
+    $project: {
+      text: 1,
+      hashtags: 1,
+      visibility: 1,
+      createdAt: 1,
+      stats: 1,
+    },
+  },
+]);

@@ -1,6 +1,6 @@
 use("social_media_demo");
 
-const hashtag = "#coding"; // change as needed
+const hashtag = "#coding";
 
 db.posts
   .find({ hashtags: hashtag, visibility: "public" })

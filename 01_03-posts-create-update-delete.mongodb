@@ -1,7 +1,7 @@
 use("social_media_demo");
 
-const authorIdRaw = "REPLACE_AUTHOR_ID";
-const postIdRaw = "REPLACE_POST_ID";
+const authorIdRaw = "6940a0be4952173915b40153";
+const postIdRaw = "6940a0be4952173915b40346";
 
 const authorId = authorIdRaw.startsWith("REPLACE")
   ? db.users.findOne({}, { _id: 1 })._id

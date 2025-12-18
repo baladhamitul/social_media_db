@@ -1,7 +1,7 @@
 use("social_media_demo");
 
 const userIdRaw = "6940a0be4952173915b4014e"; // or leave and set emailRaw
-const emailRaw = "new.user4@example.com"; // set to resolve by email
+const emailRaw = "rahul1@gmail.com"; // set to resolve by email
 
 let userId = null;
 if (!emailRaw.startsWith("REPLACE")) {

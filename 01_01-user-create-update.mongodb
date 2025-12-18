@@ -1,7 +1,7 @@
 use("social_media_demo");
 
 const userIdRaw = "REPLACE_USER_ID";
-const emailRaw = "kellen_effertz45@gmail.com"; // change if needed
+const emailRaw = "rahul1@gmail.com";
 
 db.users.insertOne({
   email: emailRaw,

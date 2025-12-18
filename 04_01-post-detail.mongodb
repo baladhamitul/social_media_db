@@ -1,6 +1,6 @@
 use("social_media_demo");
 
-const postIdRaw = "REPLACE_POST_ID";
+const postIdRaw = "6940a0be4952173915b40344";
 const postId = postIdRaw.startsWith("REPLACE")
   ? db.posts.findOne({}, { _id: 1 })._id
   : ObjectId(postIdRaw);
